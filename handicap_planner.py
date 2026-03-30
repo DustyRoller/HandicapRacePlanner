@@ -1,25 +1,25 @@
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 
 def calculate_start_times(input_file: Path) -> None:
-    estimated_times = []
-    with open(input_file, "r") as f:
+    estimated_times: list[str] = []
+    with Path.open(input_file, "r") as f:
         for line in f.readlines():
             estimated_times.append(line)
 
-    times = []
+    times: list[tuple[str, timedelta]] = []
 
     for estimated_time in estimated_times:
         name, time_str = map(str, estimated_time.split(" - "))
         minutes, seconds = map(int, time_str.split(":"))
         times.append((name, timedelta(minutes=minutes, seconds=seconds)))
 
-    sorted_times = sorted(times, key=lambda x: x[1], reverse=True)
+    sorted_times: list[tuple[str, timedelta]] = sorted(times, key=lambda x: x[1], reverse=True)
 
-    race_start_time = timedelta(hours=12)
+    race_start_time: timedelta = timedelta(hours=12)
 
-    start_times: list[tuple] = []
+    start_times: list[tuple[str, timedelta]] = []
 
     start_times.append((sorted_times[0][0], race_start_time))
 
