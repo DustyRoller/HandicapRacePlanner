@@ -2,7 +2,7 @@ from datetime import timedelta
 from pathlib import Path
 
 
-def calculate_start_times(input_file: Path) -> None:
+def calculate_start_times(input_file: Path) -> list[tuple[str, timedelta]]:
     estimated_times: list[str] = []
     with Path.open(input_file, "r") as f:
         for line in f.readlines():
@@ -26,8 +26,7 @@ def calculate_start_times(input_file: Path) -> None:
     for time in sorted_times[1:]:
         start_times.append((time[0], race_start_time + (sorted_times[0][1] - time[1])))
 
-    for start_time in start_times:
-        print(f"{start_time[0]} - {start_time[1]}")
+    return start_times
 
 
 if __name__ == "__main__":
@@ -44,4 +43,7 @@ if __name__ == "__main__":
     if not args.times.is_file():
         exit(f"File does not exist: {args.times}")
 
-    calculate_start_times(args.times)
+    start_times: list[tuple[str, timedelta]] = calculate_start_times(args.times)
+
+    for start_time in start_times:
+        print(f"{start_time[0]} - {start_time[1]}")
