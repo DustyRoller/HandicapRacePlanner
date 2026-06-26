@@ -1,35 +1,40 @@
+from dataclasses import dataclass
 from datetime import timedelta
 from pathlib import Path
 
 
-def calculate_start_times(input_file: Path) -> list[tuple[str, timedelta]]:
-    estimated_times: list[str] = []
-    with Path.open(input_file, "r") as f:
-        for line in f.readlines():
-            estimated_times.append(line)
+@dataclass
+class HandicapEntry:
+    name: str
+    estimated_time: timedelta
+    start_time: timedelta = timedelta()
 
-    if not estimated_times:
+
+def calculate_start_times(input_file: Path) -> list[HandicapEntry]:
+    handicap_entries: list[HandicapEntry] = []
+
+    with input_file.open() as f:
+        for line in f.readlines():
+            name, time_str = map(str, line.split(" - "))
+            minutes, seconds = map(int, time_str.split(":"))
+            estimated_time: timedelta = timedelta(minutes=minutes, seconds=seconds)
+            handicap_entries.append(HandicapEntry(name, estimated_time))
+
+    if not handicap_entries:
         raise RuntimeError(f"Failed to read any values from {input_file}")
 
-    times: list[tuple[str, timedelta]] = []
-
-    for estimated_time in estimated_times:
-        name, time_str = map(str, estimated_time.split(" - "))
-        minutes, seconds = map(int, time_str.split(":"))
-        times.append((name, timedelta(minutes=minutes, seconds=seconds)))
-
-    sorted_times: list[tuple[str, timedelta]] = sorted(times, key=lambda x: x[1], reverse=True)
+    sorted_handicap_entries: list[HandicapEntry] = sorted(handicap_entries, key=lambda x: x.estimated_time, reverse=True)
 
     race_start_time: timedelta = timedelta(hours=12)
 
-    start_times: list[tuple[str, timedelta]] = []
+    for i, entry in enumerate(sorted_handicap_entries):
+        if i == 0:
+            entry.start_time = race_start_time
+        else:
+            previous_entry: HandicapEntry = sorted_handicap_entries[i - 1]
+            entry.start_time = previous_entry.start_time + (previous_entry.estimated_time - entry.estimated_time)
 
-    start_times.append((sorted_times[0][0], race_start_time))
-
-    for time in sorted_times[1:]:
-        start_times.append((time[0], race_start_time + (sorted_times[0][1] - time[1])))
-
-    return start_times
+    return sorted_handicap_entries
 
 
 if __name__ == "__main__":
@@ -46,7 +51,7 @@ if __name__ == "__main__":
     if not args.times.is_file():
         exit(f"File does not exist: {args.times}")
 
-    start_times: list[tuple[str, timedelta]] = calculate_start_times(args.times)
+    entries: list[HandicapEntry] = calculate_start_times(args.times)
 
-    for start_time in start_times:
-        print(f"{start_time[0]} - {start_time[1]}")
+    for entry in entries:
+        print(f"{entry.name} - {entry.start_time}")

@@ -6,7 +6,7 @@ from handicap_planner import calculate_start_times
 
 class TestHandicapPlanner(TestCase):
     def test_calculate_start_times_errors_if_file_is_empty(self):
-        test_file_path = "testdata.txt"
+        test_file_path = Path("testdata.txt")
 
         with Path.open(test_file_path, "w"):
             pass
@@ -19,7 +19,7 @@ class TestHandicapPlanner(TestCase):
         Path.unlink(test_file_path)
 
     def test_calculate_start_times_errors_if_data_is_malformed(self):
-        test_file_path = "testdata.txt"
+        test_file_path = Path("testdata.txt")
 
         with Path.open(test_file_path, "w") as f:
             f.write("a\n")
@@ -32,7 +32,7 @@ class TestHandicapPlanner(TestCase):
         Path.unlink(test_file_path)
 
     def test_calculate_start_times_errors_if_time_is_malformed(self):
-        test_file_path = "testdata.txt"
+        test_file_path = Path("testdata.txt")
 
         with Path.open(test_file_path, "w") as f:
             f.write("a - 26-00\n")
@@ -45,21 +45,21 @@ class TestHandicapPlanner(TestCase):
         Path.unlink(test_file_path)
 
     def test_calculate_start_times_returns_expected_results(self):
-        test_file_path = "testdata.txt"
+        test_file_path = Path("testdata.txt")
 
         with Path.open(test_file_path, "w") as f:
             f.write("a - 25:00\n")
-            f.write("b - 26:00\n")
+            f.write("b - 26:30\n")
             f.write("c - 24:00\n")
 
-        start_times = calculate_start_times(test_file_path)
+        handicap_entries = calculate_start_times(test_file_path)
 
-        self.assertEqual(3, len(start_times))
-        self.assertEqual("b", start_times[0][0])
-        self.assertEqual("12:00:00", str(start_times[0][1]))
-        self.assertEqual("a", start_times[1][0])
-        self.assertEqual("12:01:00", str(start_times[1][1]))
-        self.assertEqual("c", start_times[2][0])
-        self.assertEqual("12:02:00", str(start_times[2][1]))
+        self.assertEqual(3, len(handicap_entries))
+        self.assertEqual("b", handicap_entries[0].name)
+        self.assertEqual("12:00:00", str(handicap_entries[0].start_time))
+        self.assertEqual("a", handicap_entries[1].name)
+        self.assertEqual("12:01:30", str(handicap_entries[1].start_time))
+        self.assertEqual("c", handicap_entries[2].name)
+        self.assertEqual("12:02:30", str(handicap_entries[2].start_time))
 
         Path.unlink(test_file_path)
