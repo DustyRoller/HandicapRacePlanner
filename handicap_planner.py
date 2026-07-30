@@ -29,7 +29,7 @@ def calculate_result_data(input_file: Path) -> list[HandicapResult]:
             estimated_time: timedelta = timedelta(minutes=est_minutes, seconds=est_seconds)
             split_minutes, split_seconds = map(int, split_str.split(":"))
             split_time: timedelta = timedelta(minutes=split_minutes, seconds=split_seconds)
-            handicap_results.append((HandicapResult(name, estimated_time, int(position_str), split_time)))
+            handicap_results.append(HandicapResult(name, estimated_time, int(position_str), split_time))
 
     if not handicap_results:
         raise RuntimeError(f"Failed to read any values from {input_file}")
