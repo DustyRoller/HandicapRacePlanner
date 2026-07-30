@@ -38,6 +38,7 @@ def calculate_start_times(input_file: Path) -> list[HandicapEntry]:
 
 
 if __name__ == "__main__":
+    import sys
     from argparse import ArgumentParser, Namespace
 
     parser: ArgumentParser = ArgumentParser(
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     args: Namespace = parser.parse_args()
 
     if not args.times.is_file():
-        exit(f"File does not exist: {args.times}")
+        sys.exit(f"File does not exist: {args.times}")
 
     entries: list[HandicapEntry] = calculate_start_times(args.times)
 
