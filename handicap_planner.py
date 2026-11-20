@@ -26,7 +26,7 @@ def calculate_result_data(input_file: Path) -> list[HandicapResult]:
 
     with input_file.open() as f:
         for line in f.readlines():
-            name, start_time_str, time_str, position_str, split_str = map(str, line.split(" - "))
+            name, time_str, start_time_str, position_str, split_str = map(str, line.split(" - "))
             start_hours, start_minutes, start_seconds = map(int, start_time_str.split(":"))
             race_start_time: timedelta = timedelta(hours=12)
             start_time_offset: timedelta = timedelta(hours=start_hours, minutes=start_minutes, seconds=start_seconds) - race_start_time
@@ -80,6 +80,13 @@ def calculate_start_times(input_file: Path) -> list[HandicapEntry]:
     return sorted_handicap_entries
 
 
+def format_timedelta_minute_seconds(time: timedelta) -> str:
+    # Convert the timedelta to mm:ss (default string representation will include hours).
+    total_seconds: int = int(time.total_seconds())
+    minutes, seconds = divmod(total_seconds, 60)
+    return f"{minutes:02d}:{seconds:02d}"
+
+
 if __name__ == "__main__":
     import sys
     from argparse import ArgumentParser, Namespace, _MutuallyExclusiveGroup
@@ -101,7 +108,7 @@ if __name__ == "__main__":
         entries: list[HandicapEntry] = calculate_start_times(args.times)
 
         for entry in entries:
-            print(f"{entry.name} - {entry.start_time}")
+            print(f"{entry.name} - {format_timedelta_minute_seconds(entry.estimated_time)} - {entry.start_time}")
     else:
         if not args.results.is_file():
             sys.exit(f"File does not exist: {args.results}")
@@ -112,4 +119,8 @@ if __name__ == "__main__":
             diff: timedelta = result.race_time - result.estimated_time
             sign: str = "+" if diff.total_seconds() >= 0 else "-"
 
-            print(f"{result.name} - {result.estimated_time} - {result.finish_time} - {result.race_time} - {sign}{abs(diff)}")
+            print(
+                f"{result.name} - {format_timedelta_minute_seconds(result.estimated_time)} - "
+                f"{format_timedelta_minute_seconds(result.finish_time)} - "
+                f"{format_timedelta_minute_seconds(result.race_time)} - {sign}{abs(diff)}"
+            )
