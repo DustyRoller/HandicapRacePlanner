@@ -1,7 +1,12 @@
+from datetime import timedelta
 from pathlib import Path
 from unittest import TestCase
 
-from handicap_planner import calculate_result_data, calculate_start_times
+from handicap_planner import (
+    calculate_result_data,
+    calculate_start_times,
+    format_timedelta_minute_seconds,
+)
 
 
 class TestHandicapPlanner(TestCase):
@@ -107,9 +112,9 @@ class TestHandicapPlanner(TestCase):
         test_file_path = Path("testdata.txt")
 
         with Path.open(test_file_path, "w") as f:
-            f.write("a - 12:00:00 - 25:00 - 1 - 15:00\n")
-            f.write("b - 12:00:30 - 26:30 - 3 - 1:00\n")
-            f.write("c - 12:01:25 - 24:00 - 2 - 0:30\n")
+            f.write("a - 25:00 - 12:00:00 - 1 - 15:00\n")
+            f.write("b - 26:30 - 12:00:30 - 3 - 1:00\n")
+            f.write("c - 24:00 - 12:01:25 - 2 - 0:30\n")
 
         handicap_entries = calculate_result_data(test_file_path)
 
@@ -128,3 +133,12 @@ class TestHandicapPlanner(TestCase):
         self.assertEqual("0:16:00", str(handicap_entries[2].race_time))
 
         Path.unlink(test_file_path)
+
+    def test_format_timedelta_minute_seconds_returns_expected_result(self):
+        minutes: int = 10
+        seconds: int = 12
+        time: timedelta = timedelta(minutes=minutes, seconds=seconds)
+
+        formatted_str = format_timedelta_minute_seconds(time)
+
+        self.assertEqual(f"{minutes}:{seconds}", formatted_str)
